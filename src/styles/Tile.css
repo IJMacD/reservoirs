@@ -1,0 +1,47 @@
+.tile {
+    display: inline-block;
+    width: 150px;
+    height: 150px;
+    margin: 15px;
+    background: white;
+    border: 1px solid #333;
+    border-radius: 10px;
+    padding: 15px 5px;
+    vertical-align: bottom;
+    position: relative;
+    font-size: 1.2em;
+    font-weight: bold;
+    overflow: hidden;
+    box-shadow: 1px 1px 4px #111;
+}
+
+.shade {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    box-shadow: 0 0 4px black;
+}
+
+.percent {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    font-size: 2em;
+    font-weight: bold;
+    padding: 10px;
+    color: white;
+    text-align: right;
+    opacity: 0.9;
+    text-shadow: 1px 1px 4px black;
+}
+
+.name {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    padding: 10px;
+    text-shadow: 1px 1px 2px #777;
+}
