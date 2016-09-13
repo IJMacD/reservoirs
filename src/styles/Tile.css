@@ -15,12 +15,22 @@
     box-shadow: 1px 1px 4px #111;
 }
 
+@media (max-width: 400px) {
+    .tile {
+        margin: 5px;
+    }
+}
+
 .shade {
     position: absolute;
-    bottom: 0;
-    right: 0;
-    left: 0;
+    bottom: 5px;
+    right: 5px;
+    left: 5px;
     box-shadow: 0 0 4px black;
+    border-radius: 5px;
+    background: rgba(0,0,0,0.4);
+    background-size: cover;
+    background-position-y: 95%
 }
 
 .percent {
@@ -30,8 +40,9 @@
     left: 0;
     font-size: 2em;
     font-weight: bold;
-    padding: 10px;
+    padding: 0 10px;
     color: white;
+    opacity: 0.6;
     text-align: right;
     text-shadow: 1px 1px 4px black;
 }

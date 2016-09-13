@@ -12,14 +12,10 @@ export default (props) => {
     };
     const percent = `${reservoir.utilisation * 100}%`;
     const shadeStyle = {
-        background: reservoir.image ? `url(${reservoir.image})` : "rgba(0,0,0,0.4)",
-        backgroundSize: "cover",
-        height: percent,
-        lineHeight: `${reservoir.utilisation * tileStyle.height}px`
+        backgroundImage: reservoir.image ? `url(${reservoir.image})` : null,
+        height: (tileStyle.height - 12) * reservoir.utilisation
     };
-    const percentStyle = {
-        color: colorShade
-    };
+    const percentStyle = {};
 
     return (
         <li className={styles.tile} style={tileStyle}>
