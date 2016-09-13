@@ -40,6 +40,46 @@ app.get('/db', function (request, response) {
   });
 });
 
+var request = require('request');
+var cheerio = require('cheerio');
+
+app.get('/reservoirs.json', function(req, res) {
+  var url = "http://www.wsd.gov.hk/en/publications_and_statistics/statistics/current_storage_position_of_reservoirs/";
+
+  var result = {
+    reservoirs: []
+  };
+
+  request(url, function(error, response, html) {
+    if(!error) {
+      var $ = cheerio.load(html);
+
+      var table = $('.tableframe').get(1);
+
+      if(table) {
+        $(table).find('.tabletext').each(function () {
+          var cells = $(this).find('td'),
+              name = $(cells[0]).text(),
+              capacity = parseFloat($(cells[1]).text()) * 1e6,
+              utilisation = parseFloat($(cells[2]).text()) / 100;
+
+          if(name.indexOf("TOTAL") == -1){
+
+            result.reservoirs.push({
+              name: name,
+              capacity: capacity,
+              utilisation: utilisation
+            });
+          }
+
+        });
+      }
+
+      res.send(JSON.stringify(result));
+    }
+  });
+});
+
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
