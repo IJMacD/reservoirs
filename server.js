@@ -50,33 +50,40 @@ module.exports = {
 
     app.get('/reservoirs.json', function(req, res) {
       var url = "http://www.wsd.gov.hk/en/publications_and_statistics/statistics/current_storage_position_of_reservoirs/";
-      var sql = "SELECT id,name,image FROM reservoirs";
+      var sql = "SELECT id,name,utilisation,image FROM reservoirs";
 
       Promise.all([
         fetch(url).then(scrapeHTML),
         query(sql)
       ]).then(function(results){
         var fetchData = results[0];
-        var dbData = results[1];
+        var dbData = results[1].rows;
+        var time = Date.now();
 
-        var reservoirs = fetchData.map(function (reservoir) {
+        var reservoirs = fetchData.map(function (fetchReservoir) {
           // O(n^2) but for very small n
-          var dbReservoir = findReservoir(dbData, reservoir.name) || {};
+          var dbReservoir = findReservoir(dbData, fetchReservoir.name) || {};
 
-          return {
+          var hasChanged = dbReservoir.utilisation != fetchReservoir.utilisation;
+
+          var reservoir = {
             id: dbReservoir.id,
-            name: reservoir.name,
-            capacity: reservoir.capacity,
-            utilisation: reservoir.utilisation,
+            name: fetchReservoir.name,
+            capacity: fetchReservoir.capacity,
+            utilisation: fetchReservoir.utilisation,
             image: dbReservoir.image
+          };
+
+          if(hasChanged) {
+            updateDatabase(reservoir, time);
           }
+
+          return reservoir;
         });
 
         var result = {
           reservoirs: reservoirs
         };
-
-        updateDatabase(reservoirs);
 
         res.send(JSON.stringify(result));
       }).catch(function (error) {
@@ -114,7 +121,7 @@ function query(sql, params) {
           if (err)
           { console.error(err); reject(err); }
           else
-          { resolve(result.rows); }
+          { resolve(result); }
         });
       }
     });
@@ -160,20 +167,23 @@ function findReservoir(array, name) {
   }
 }
 
-function updateDatabase (reservoirs) {
-  reservoirs.forEach(function (reservoir) {
-    var sql;
-    var params;
+function updateDatabase (reservoir, time) {
+  var sql;
+  var params;
 
-    if(reservoir.id) {
-      sql = "UPDATE reservoirs SET utilisation = $1 WHERE id = $2";
-      params = [reservoir.utilisation, reservoir.id];
-    }
-    else {
-      sql = "INSERT INTO reservoirs (name, capacity, utilisation) VALUES ($1, $2, $3)";
-      params = [reservoir.name, reservoir.capacity, reservoir.utilisation];
-    }
+  if(reservoir.id) {
+    sql = "UPDATE reservoirs SET utilisation = $1 WHERE id = $2";
+    params = [reservoir.utilisation, reservoir.id];
+  }
+  else {
+    sql = "INSERT INTO reservoirs (name, capacity, utilisation) VALUES ($1, $2, $3) RETURNING id";
+    params = [reservoir.name, reservoir.capacity, reservoir.utilisation];
+  }
 
-    query(sql, params).catch(function(error) { console.error(error); });
-  });
+  query(sql, params).then(function(result){
+    var id = reservoir.id || result.rows[0].id;
+    var sql = "INSERT INTO reservoirs_history (reservoir_id, time, capacity, utilisation) VALUES ($1, $2, $3, $4)";
+
+    return query(sql, [id, time, reservoir.capacity, reservoir.utilisation]);
+  }).catch(function(error) { console.error(error); });
 }
