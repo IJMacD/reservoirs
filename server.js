@@ -15,11 +15,7 @@ module.exports = {
     // app.set('views', __dirname + '/views');
     // app.set('view engine', 'ejs');
 
-    var indexPath = path.join(__dirname, 'public', 'index.html');
-    
-    if (process.env.NODE_ENV !== 'production') {
-        indexPath = path.join(__dirname, 'src', 'index.html');
-    }
+    var indexPath = path.join(__dirname, 'src', 'index.html');
 
     app.get('/', function(request, response) {
       // response.render('pages/index');
