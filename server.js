@@ -9,18 +9,18 @@ module.exports = {
   app: function () {
     var app = express();
 
-    app.use(express.static(path.join(__dirname, 'public')));
-
-    // views is directory for all template files
-    // app.set('views', __dirname + '/views');
-    // app.set('view engine', 'ejs');
-
-    var indexPath = path.join(__dirname, 'src', 'index.html');
+    var indexPath = path.join(__dirname, 'index.html');
 
     app.get('/', function(request, response) {
       // response.render('pages/index');
       response.sendFile(indexPath);
     });
+
+    app.use(express.static(path.join(__dirname, 'public')));
+
+    // views is directory for all template files
+    // app.set('views', __dirname + '/views');
+    // app.set('view engine', 'ejs');
 
     app.get('/cool', function(request, response) {
       response.send(cool());
