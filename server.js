@@ -15,9 +15,15 @@ module.exports = {
     // app.set('views', __dirname + '/views');
     // app.set('view engine', 'ejs');
 
+    var indexPath = path.join(__dirname, 'public', 'index.html');
+    
+    if (process.env.NODE_ENV !== 'production') {
+        indexPath = path.join(__dirname, 'src', 'index.html');
+    }
+
     app.get('/', function(request, response) {
       // response.render('pages/index');
-      response.sendFile(path.join(__dirname, 'index.html'));
+      response.sendFile(indexPath);
     });
 
     app.get('/cool', function(request, response) {
