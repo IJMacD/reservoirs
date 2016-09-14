@@ -1,6 +1,7 @@
 import React from 'react'
 
-import ReservoirTile from './ReservoirTile';
+import ReservoirGridItem from './ReservoirGridItem';
+import ReservoirBarItem from './ReservoirBarItem';
 import styles from '../styles/App.css';
 
 const RESERVOIR_URL = "/reservoirs.json";
@@ -11,7 +12,8 @@ export default class App extends React.Component {
     
     this.state = {
       isLoading: true,
-      reservoirs: []
+      reservoirs: [],
+      layout: "grid"
     };
 
     fetch(RESERVOIR_URL)
@@ -21,8 +23,12 @@ export default class App extends React.Component {
       });
   }
 
+  flipLayout () {
+    this.setState({layout: this.state.layout == "grid" ? "bar" : "grid"});
+  }
+
   render () {
-    const { isLoading, reservoirs } = this.state;
+    const { isLoading, reservoirs, layout } = this.state;
 
     reservoirs.sort((a,b) => {
       const a_val = a.utilisation * a.capacity,
@@ -30,14 +36,20 @@ export default class App extends React.Component {
       return a_val < b_val ? 1 : (a_val > b_val ? -1 : 0);
     });
 
+    const LayoutItem = layout == "grid" ? ReservoirGridItem : ReservoirBarItem;
+
     return (
       <div>
+        <h1 className={styles.heading}>
+          Water Services Department Reservoir Status
+          <button onClick={()=>this.flipLayout()} className={styles.btn}>{layout == "grid" ? "Bar" : "Grid"}</button>
+        </h1>
         { isLoading ? 
-          <p className={styles.error}>Loading</p> :
+          <p className={styles.loading2}>Loading</p> :
           <ul className={styles.list}>
           {
             reservoirs.map(reservoir => (
-              <ReservoirTile key={reservoir.name} reservoir={reservoir} />
+              <LayoutItem key={reservoir.name} reservoir={reservoir} />
             ))
           }
           { reservoirs.length == 0 &&

@@ -1,10 +1,34 @@
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
 body {
     font-family: sans-serif;
-    background: #333;
+    background: #ffd;
 }
 
 * {
     box-sizing: border-box;
+}
+
+.heading {
+    background: rgb(32,128,32);
+    color: white;
+    padding: 10px;
+    box-shadow: 0 2px 4px black;
+    margin: 0
+}
+
+.btn {
+    font-size: 14pt;
+    background: #CCC;
+    border: 1px solid #999;
+    border-radius: 5px;
+    margin: 0 10px;
+    padding: 5px 10px;
 }
 
 .list {
@@ -18,3 +42,62 @@ body {
     font-size: 1.2em;
     font-weight: bold;
 }
+
+.loading {
+    width: 100%;
+    color: black;
+    margin-top: 10%;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+}
+
+.loading2 {
+    composes: loading;
+}
+
+.loading::before {
+    content: "";
+    border: 10px dotted rgb(32,128,32);
+    display: block;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    margin: 10px auto;
+    animation: rotate 3s infinite linear;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg)
+    }
+} 
+
+.loading2::before {
+    content: "";
+    background: rgb(32,128,32);
+    display: block;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    margin: 10px auto;
+    animation: slide-over 2s infinite;
+}
+
+@keyframes slide-over {
+    from {
+        transform: translate(-20px);
+    }
+
+    50% {
+        transform: translate(20px);
+    }
+
+    to {
+        transform: translate(-20px);
+    }
+} 

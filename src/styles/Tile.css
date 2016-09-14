@@ -4,14 +4,13 @@
     height: 150px;
     margin: 15px;
     background: white;
-    border: 1px solid #333;
+    border: 1px solid rgba(0,0,0,0.3);
     border-radius: 10px;
     padding: 15px 5px;
     vertical-align: bottom;
     position: relative;
     font-size: 1.2em;
     font-weight: bold;
-    overflow: hidden;
     box-shadow: 1px 1px 4px #111;
 }
 
@@ -30,7 +29,7 @@
     border-radius: 5px;
     background: rgba(0,0,0,0.4);
     background-size: cover;
-    background-position-y: 95%
+    background-position: 50% 95%
 }
 
 .percent {
