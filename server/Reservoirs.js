@@ -9,7 +9,7 @@ module.exports = {
       ReservoirDB.getReservoirs()
     ]).then(function(results){
       var fetchData = results[0];
-      var dbData = results[1].rows;
+      var dbData = results[1];
       var time = Date.now();
 
       var reservoirs = fetchData.map(function (fetchReservoir) {

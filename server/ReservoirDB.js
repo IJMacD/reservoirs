@@ -3,7 +3,7 @@ pg.defaults.ssl = true;
 
 module.exports = {
   getReservoirs: function () {
-    return query("SELECT id,name,utilisation,image FROM reservoirs");
+    return query("SELECT id,name,utilisation,capacity,image FROM reservoirs").then(r => r.rows);
   },
 
   update: function (reservoir, time) {
