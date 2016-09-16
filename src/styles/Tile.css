@@ -12,6 +12,7 @@
     font-size: 1.2em;
     font-weight: bold;
     box-shadow: 1px 1px 4px #111;
+    white-space: initial;
 }
 
 @media (max-width: 400px) {

@@ -10,7 +10,7 @@ export default (props) => {
         height,
         background: color,
         width,
-        margin: narrow ? 5 : 15,
+        margin: narrow ? '0 5px 50px' : 15,
         fontSize: narrow ? 10 : null
     };
     const realShadeHeight = shadeHeight || (tileStyle.height - 12) * (percent / 100);

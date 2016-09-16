@@ -16,6 +16,11 @@ export default class App extends React.Component {
       layout: "grid"
     };
 
+    this.loadData();
+  }
+
+  loadData () {
+    this.setState({isLoading:true});
     fetch(RESERVOIR_URL)
       .then(result => result.json())
       .then(data => {
@@ -37,16 +42,20 @@ export default class App extends React.Component {
     });
 
     const LayoutItem = layout == "grid" ? ReservoirGridItem : ReservoirBarItem;
+    const listStyle = {
+      whiteSpace: layout == "grid" ? null : "nowrap"
+    }; 
 
     return (
       <div>
         <h1 className={styles.heading}>
           Water Services Department Reservoir Status
           <button onClick={()=>this.flipLayout()} className={styles.btn}>{layout == "grid" ? "Bar" : "Grid"}</button>
+          <button onClick={()=>this.loadData()} className={styles.btn}>Reload</button>
         </h1>
         { isLoading ? 
           <p className={styles.loading2}>Loading</p> :
-          <ul className={styles.list}>
+          <ul className={styles.list} style={listStyle}>
           {
             reservoirs.map(reservoir => (
               <LayoutItem key={reservoir.name} reservoir={reservoir} />
