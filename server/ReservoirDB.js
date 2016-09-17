@@ -19,12 +19,13 @@ module.exports = {
       params = [reservoir.name, reservoir.capacity, reservoir.utilisation];
     }
 
-    query(sql, params).then(function(result){
+    return query(sql, params).then(function(result){
       var id = reservoir.id || result.rows[0].id;
       var sql = "INSERT INTO reservoirs_history (reservoir_id, time, capacity, utilisation) VALUES ($1, $2, $3, $4)";
+      reservoir.id = id;
 
       return query(sql, [id, time, reservoir.capacity, reservoir.utilisation]);
-    }).catch(function(error) { console.error(error); });
+    }).catch(function(error) { console.error(error); }).then(() => reservoir);
   }
 };
 

@@ -27,13 +27,13 @@ module.exports = {
         };
 
         if(hasChanged) {
-          ReservoirDB.update(reservoir, time);
+          return ReservoirDB.update(reservoir, time).then(() => reservoir);
         }
 
         return reservoir;
       });
 
-      return reservoirs;
+      return Promise.all(reservoirs);
     });
   }
 };
