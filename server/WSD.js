@@ -1,6 +1,6 @@
 const request = require('request');
 
-const url = "http://www.wsd.gov.hk/en/publications_and_statistics/statistics/current_storage_position_of_reservoirs/";
+const url = "https://www.wsd.gov.hk/en/core-businesses/operation-and-maintenance-of-waterworks/waterworks/current-storage-position-of-impounding-reservoirs/index.html";
 
 module.exports = {
   getReservoirs: function () {
@@ -26,26 +26,29 @@ function scrapeHTML (html) {
 
   var $ = cheerio.load(html);
 
-  var table = $('.tableframe').get(1);
+  var table = $('table').get(1);
 
   var reservoirs = [];
 
   if(table) {
-    $(table).find('.tabletext').each(function () {
-      var cells = $(this).find('td'),
-          name = $(cells[0]).text(),
-          capacity = parseFloat($(cells[1]).text()) * 1e6,
-          utilisation = parseFloat($(cells[2]).text()) / 100;
+    $(table).find('tr').each(function () {
+      var cells = $(this).find('td');
+      if (cells.length === 3) {
+        const name = $(cells[0]).text(),
+              capacity = parseFloat($(cells[1]).text()) * 1e6,
+              utilisation = parseFloat($(cells[2]).text()) / 100;
 
-      // Exclude total row
-      if(name.indexOf("TOTAL") == -1){
+        // Exclude total row
+        if(name.indexOf("TOTAL") == -1){
 
-        reservoirs.push({
-          name: name,
-          capacity: capacity,
-          utilisation: utilisation
-        });
+          reservoirs.push({
+            name: name,
+            capacity: capacity,
+            utilisation: utilisation
+          });
+        }
       }
+
 
     });
   }
