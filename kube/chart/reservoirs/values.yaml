@@ -5,6 +5,14 @@ mariadb:
     database: reservoirs
     username: reservoirs_user
   initdbScriptsConfigMap: reservoirs-mariadb-init
+  primary:
+    resources:
+      requests:
+        memory: 100Mi
+        cpu: 25m
+      limits:
+        memory: 200Mi
+        cpu: 50m
 web:
   replicaCount: 1
   repository:
