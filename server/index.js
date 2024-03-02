@@ -5,21 +5,21 @@ const PORT = process.env.PORT || 3001;
 
 var app = express();
 
-var indexPath = path.join(__dirname, '../dist/index.html');
+var indexPath = path.join(__dirname, './dist/index.html');
 
-app.get('/', function(request, response) {
+app.get('/', function (request, response) {
   response.sendFile(indexPath);
 });
 
-app.use(express.static(path.join(__dirname, '../dist')));
+app.use(express.static(path.join(__dirname, './dist')));
 
-app.get('/reservoirs.json', function(req, res) {
+app.get('/reservoirs.json', function (req, res) {
 
   res.header("Access-Control-Allow-Origin", "*");
 
   const Reservoirs = require('./Reservoirs');
 
-  Reservoirs.checkReservoirs().then(function (reservoirs){
+  Reservoirs.checkReservoirs().then(function (reservoirs) {
 
     var result = {
       reservoirs
@@ -28,7 +28,7 @@ app.get('/reservoirs.json', function(req, res) {
     res.send(JSON.stringify(result));
   }).catch(function (error) {
     console.error(error);
-    res.send(JSON.stringify({error: error}));
+    res.send(JSON.stringify({ error: error }));
   });
 
 });

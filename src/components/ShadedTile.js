@@ -1,10 +1,10 @@
 import React from 'react';
 
-import styles from '../styles/Tile.css';
+import styles from '../styles/Tile.module.css';
 
 export default (props) => {
     const { title, percent, height, shadeHeight, width, image, color } = props;
-    
+
     const narrow = width < 100;
     const tileStyle = {
         height,
@@ -29,7 +29,7 @@ export default (props) => {
     return (
         <li className={styles.tile} style={tileStyle}>
             <span className={styles.shade} style={shadeStyle}></span>
-            <span className={styles.percent} style={percentStyle}>{percent}%</span>
+            <span className={styles.percent} style={percentStyle}>{percent.toFixed(0)}%</span>
             <span className={styles.name} style={titleStyle}>{title}</span>
         </li>
     );

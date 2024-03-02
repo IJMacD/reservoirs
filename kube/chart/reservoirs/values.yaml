@@ -1,0 +1,17 @@
+appVersion: ""
+hostname: reservoirs.ijmacd.com
+mariadb:
+  auth:
+    database: reservoirs
+    username: reservoirs_user
+  initdbScriptsConfigMap: reservoirs-mariadb-init
+web:
+  replicaCount: 1
+  repository:
+    image: docker.io/ijmacd/reservoirs
+    tag: ""
+  existingSecret:
+  tls:
+    enabled: false
+  local:
+    enabled: false
