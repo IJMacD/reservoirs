@@ -2,14 +2,14 @@ var mysql = require('mysql');
 
 module.exports = {
   getReservoirs: function () {
-    return query("SELECT id,name,utilisation,capacity,image FROM reservoirs").then(r => r.rows);
+    return query("SELECT id,name,utilisation,capacity,image FROM reservoirs");
   },
 
   update: function (reservoir, time) {
     var sql;
     var params;
 
-    if(reservoir.id) {
+    if (reservoir.id) {
       sql = "UPDATE reservoirs SET utilisation = ? WHERE id = ?";
       params = [reservoir.utilisation, reservoir.id];
     }
@@ -18,45 +18,56 @@ module.exports = {
       params = [reservoir.name, reservoir.capacity, reservoir.utilisation];
     }
 
-    return query(sql, params).then(function(result){
+    return query(sql, params).then(function (result) {
       var id = reservoir.id || result.rows[0].id;
       var sql = "INSERT INTO reservoirs_history (reservoir_id, time, capacity, utilisation) VALUES (?, ?, ?, ?)";
       reservoir.id = id;
 
-      return query(sql, [id, time, reservoir.capacity, reservoir.utilisation]);
-    }).catch(function(error) { console.error(error); }).then(() => reservoir);
+      // Server timezone has been set to +00:00 for this connection
+      // `time` column is TIMESTAMP which saves it as the correct point in time.
+      // n.b. DATETIME column does NOT store the correct moment in time (i.e. it
+      // is timezone agnostic)
+      const serverDate = new Date(time).toISOString().replace("T", " ").replace("Z", "");
+
+      return query(sql, [id, serverDate, reservoir.capacity, reservoir.utilisation]);
+    }).catch(function (error) { console.error(error); }).then(() => reservoir);
   }
 };
 
-function query (sql, params) {
-  return new Promise(function(resolve, reject){
-    if (typeof process.env.DATABASE_URL !== "string") {
-      reject("DATABASE_URL not set");
-      return;
-    }
+function query(sql, params) {
+  return new Promise(function (resolve, reject) {
+    const {
+      DATABASE_HOST,
+      DATABASE_NAME,
+      DATABASE_USER,
+      DATABASE_PASS,
+    } = process.env;
+    const connectionString = `mysql://${DATABASE_USER}:${DATABASE_PASS}@${DATABASE_HOST}/${DATABASE_NAME}`;
 
-    const connection = mysql.createConnection(process.env.DATABASE_URL);
+    const connection = mysql.createConnection(connectionString);
 
-    connection.connect(function(err) {
+    connection.connect(function (err) {
       if (err) {
         console.error(err);
         reject(err);
         return;
       }
 
+      connection.query("SET time_zone = '+00:00';", null, () => {
 
-      connection.query(sql, params, function(err, results, fields) {
-        if (err) {
-          console.error(err);
-          reject(err);
-          return;
-        }
+        connection.query(sql, params, function (err, results, fields) {
+          if (err) {
+            console.error(err);
+            reject(err);
+            return;
+          }
 
-        resolve(results);
+          resolve(results);
+
+          connection.end();
+        });
+
       });
-
-      connection.end();
-
     });
 
   });
