@@ -1,40 +1,37 @@
 var express = require('express');
-var path = require('path')
+var path = require('path');
 
-module.exports = {
-  app: function () {
-    var app = express();
+const PORT = process.env.PORT || 3001;
 
-    var indexPath = path.join(__dirname, '/../src/index.html');
+var app = express();
 
-    if(process.env.NODE_ENV != "production") {
-      indexPath = path.join(__dirname, '/../index.html');
-    }
+var indexPath = path.join(__dirname, '../dist/index.html');
 
-    app.get('/', function(request, response) {
-      response.sendFile(indexPath);
-    });
+app.get('/', function(request, response) {
+  response.sendFile(indexPath);
+});
 
-    app.use(express.static(path.join(__dirname, '/../public')));
+app.use(express.static(path.join(__dirname, '../dist')));
 
-    app.get('/reservoirs.json', function(req, res) {
+app.get('/reservoirs.json', function(req, res) {
 
-      const Reservoirs = require('./Reservoirs');
+  res.header("Access-Control-Allow-Origin", "*");
 
-      Reservoirs.checkReservoirs().then(function (reservoirs){
+  const Reservoirs = require('./Reservoirs');
 
-        var result = {
-          reservoirs
-        };
+  Reservoirs.checkReservoirs().then(function (reservoirs){
 
-        res.send(JSON.stringify(result));
-      }).catch(function (error) {
-        console.error(error);
-        res.send(JSON.stringify({error: error}));
-      });
+    var result = {
+      reservoirs
+    };
 
-    });
+    res.send(JSON.stringify(result));
+  }).catch(function (error) {
+    console.error(error);
+    res.send(JSON.stringify({error: error}));
+  });
 
-    return app;
-  }
-}
+});
+
+app.listen(PORT);
+console.log("Listening on port %d", PORT);

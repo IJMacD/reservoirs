@@ -1,5 +1,4 @@
-var pg = require('pg');
-pg.defaults.ssl = true;
+var mysql = require('mysql');
 
 module.exports = {
   getReservoirs: function () {
@@ -11,17 +10,17 @@ module.exports = {
     var params;
 
     if(reservoir.id) {
-      sql = "UPDATE reservoirs SET utilisation = $1 WHERE id = $2";
+      sql = "UPDATE reservoirs SET utilisation = ? WHERE id = ?";
       params = [reservoir.utilisation, reservoir.id];
     }
     else {
-      sql = "INSERT INTO reservoirs (name, capacity, utilisation) VALUES ($1, $2, $3) RETURNING id";
+      sql = "INSERT INTO reservoirs (name, capacity, utilisation) VALUES (?, ?, ?) RETURNING id";
       params = [reservoir.name, reservoir.capacity, reservoir.utilisation];
     }
 
     return query(sql, params).then(function(result){
       var id = reservoir.id || result.rows[0].id;
-      var sql = "INSERT INTO reservoirs_history (reservoir_id, time, capacity, utilisation) VALUES ($1, $2, $3, $4)";
+      var sql = "INSERT INTO reservoirs_history (reservoir_id, time, capacity, utilisation) VALUES (?, ?, ?, ?)";
       reservoir.id = id;
 
       return query(sql, [id, time, reservoir.capacity, reservoir.utilisation]);
@@ -31,17 +30,34 @@ module.exports = {
 
 function query (sql, params) {
   return new Promise(function(resolve, reject){
-    pg.connect(process.env.DATABASE_URL, function(err, client, done) {
-      if (err) { console.error(err); reject(err); }
-      else {
-        client.query(sql, params, function(err, result) {
-          done();
-          if (err)
-          { console.error(err); reject(err); }
-          else
-          { resolve(result); }
-        });
+    if (typeof process.env.DATABASE_URL !== "string") {
+      reject("DATABASE_URL not set");
+      return;
+    }
+
+    const connection = mysql.createConnection(process.env.DATABASE_URL);
+
+    connection.connect(function(err) {
+      if (err) {
+        console.error(err);
+        reject(err);
+        return;
       }
+
+
+      connection.query(sql, params, function(err, results, fields) {
+        if (err) {
+          console.error(err);
+          reject(err);
+          return;
+        }
+
+        resolve(results);
+      });
+
+      connection.end();
+
     });
+
   });
 }

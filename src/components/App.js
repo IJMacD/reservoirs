@@ -4,18 +4,21 @@ import ReservoirGridItem from './ReservoirGridItem';
 import ReservoirBarItem from './ReservoirBarItem';
 import styles from '../styles/App.css';
 
-const RESERVOIR_URL = "/reservoirs.json";
+const RESERVOIR_URL = process.env.REACT_APP_API_ROOT;
 
 export default class App extends React.Component {
   constructor () {
     super();
-    
+
     this.state = {
       isLoading: true,
+      error: null,
       reservoirs: [],
       layout: "grid"
     };
+  }
 
+  componentDidMount () {
     this.loadData();
   }
 
@@ -24,8 +27,12 @@ export default class App extends React.Component {
     fetch(RESERVOIR_URL)
       .then(result => result.json())
       .then(data => {
-        this.setState({isLoading: false, reservoirs: data.reservoirs || []})
-      });
+        this.setState({ reservoirs: data.reservoirs || [] })
+      },
+      () => {
+        this.setState({ error: "Unable to load reservoirs" })
+      })
+      .then(() => this.setState({ isLoading: false }));
   }
 
   flipLayout () {
@@ -33,7 +40,7 @@ export default class App extends React.Component {
   }
 
   render () {
-    const { isLoading, reservoirs, layout } = this.state;
+    const { isLoading, reservoirs, layout, error } = this.state;
 
     reservoirs.sort((a,b) => {
       const a_val = a.utilisation * a.capacity,
@@ -44,7 +51,7 @@ export default class App extends React.Component {
     const LayoutItem = layout == "grid" ? ReservoirGridItem : ReservoirBarItem;
     const listStyle = {
       whiteSpace: layout == "grid" ? null : "nowrap"
-    }; 
+    };
 
     return (
       <div>
@@ -53,18 +60,23 @@ export default class App extends React.Component {
           <button onClick={()=>this.flipLayout()} className={styles.btn}>{layout == "grid" ? "Bar" : "Grid"}</button>
           <button onClick={()=>this.loadData()} className={styles.btn}>Reload</button>
         </h1>
-        { isLoading ? 
-          <p className={styles.loading2}>Loading</p> :
-          <ul className={styles.list} style={listStyle}>
-          {
-            reservoirs.map(reservoir => (
-              <LayoutItem key={reservoir.name} reservoir={reservoir} />
-            ))
-          }
-          { reservoirs.length == 0 &&
-            <li className={styles.error}>That's strange but there seem to be no reservoirs</li>
-          }
-          </ul>
+        { isLoading ?
+            <p className={styles.loading2}>Loading</p> :
+            (
+              error ?
+                <p>{error}</p>
+                :
+                <ul className={styles.list} style={listStyle}>
+                {
+                  reservoirs.map(reservoir => (
+                    <LayoutItem key={reservoir.name} reservoir={reservoir} />
+                  ))
+                }
+                { reservoirs.length == 0 &&
+                  <li className={styles.error}>That's strange but there seem to be no reservoirs</li>
+                }
+                </ul>
+            )
         }
       </div>
     )
