@@ -10,8 +10,8 @@ module.exports = {
   },
 
   /**
-   *
-   * @param {import('./Reservoirs').Reservoir} reservoir
+   * Updates (or inserts) current reservoir data and logs history
+   * @param {{id: string|undefined,name:string,capacity:number,utilisation:number}} reservoir
    * @param {number} time
    * @returns
    */
@@ -19,16 +19,16 @@ module.exports = {
     var sql;
     var params;
 
-    if (reservoir.id) {
-      sql = "UPDATE reservoirs SET utilisation = ? WHERE id = ?";
-      params = [reservoir.utilisation, reservoir.id];
-    }
-    else {
-      sql = "INSERT INTO reservoirs (name, capacity, utilisation) VALUES (?, ?, ?) RETURNING id";
-      params = [reservoir.name, reservoir.capacity, reservoir.utilisation];
-    }
-
     try {
+      if (typeof reservoir.id !== "undefined") {
+        sql = "UPDATE reservoirs SET utilisation = ? WHERE id = ?";
+        params = [reservoir.utilisation, reservoir.id];
+      }
+      else {
+        sql = "INSERT INTO reservoirs (name, capacity, utilisation) VALUES (?, ?, ?) RETURNING id";
+        params = [reservoir.name, reservoir.capacity, reservoir.utilisation];
+      }
+
       const result = await query(sql, params);
 
       var id = reservoir.id || result.rows[0].id;
@@ -64,6 +64,7 @@ function query(sql, params) {
       DATABASE_USER,
       DATABASE_PASS,
     } = process.env;
+
     const connectionString = `mysql://${DATABASE_USER}:${DATABASE_PASS}@${DATABASE_HOST}/${DATABASE_NAME}`;
 
     const connection = mysql.createConnection(connectionString);

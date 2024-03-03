@@ -1,19 +1,16 @@
 
 /**
  * @typedef Reservoir
- * @property {string?} id
+ * @property {string} id
  * @property {string} name
  * @property {number} capacity
  * @property {number} utilisation
- * @property {string?} image
+ * @property {string} image
  */
 
 module.exports = {
-  /**
-   * Checks Reservoirs upstream and updates database as necessary
-   * @returns {Promise<Reservoir[]>}
-   */
-  checkReservoirs: async function () {
+
+  checkAndUpdateReservoirs: async function () {
     var WSD = require('./WSD');
     var ReservoirDB = require('./ReservoirDB');
 
@@ -27,34 +24,41 @@ module.exports = {
 
     var time = Date.now();
 
-    var reservoirs = fetchData.map(function (fetchReservoir) {
+    let changed = 0;
+
+    for (const fetchReservoir of fetchData) {
 
       var dbReservoir = dbData.find(r => r.name === fetchReservoir.name);
 
+      if (!dbReservoir) {
+        console.log(`New reservoir: ${fetchReservoir.name}`);
+      }
+
       var reservoir = {
-        id: dbReservoir?.id ?? null,
+        id: dbReservoir?.id,
         name: fetchReservoir.name,
         capacity: fetchReservoir.capacity,
         utilisation: fetchReservoir.utilisation,
-        image: dbReservoir?.image ?? null
+        image: dbReservoir?.image,
       };
 
-      if (!dbReservoir) {
-        console.warn(`Unable to find reservoir ${fetchReservoir.name} in database`);
-        return reservoir;
+      if (dbReservoir) {
+        // Just for logging verboseness
+        var hasChanged = dbReservoir.utilisation.toFixed(5) !== fetchReservoir.utilisation.toFixed(5);
+
+        if (hasChanged) {
+          console.log(`${fetchReservoir.name} has changed from ${(dbReservoir.utilisation * 100).toFixed(3)}% to  ${(fetchReservoir.utilisation * 100).toFixed(3)}%`);
+          changed++;
+        }
       }
 
-      // Check if reservoir utilisation has changed (more than float limits) and
-      // update as necessary.
-      var hasChanged = dbReservoir.utilisation.toFixed(5) !== fetchReservoir.utilisation.toFixed(5);
+      // Always add history to database
+      ReservoirDB.update(reservoir, time);
+    }
 
-      if (hasChanged) {
-        return ReservoirDB.update(reservoir, time).then(() => reservoir);
-      }
-
-      return reservoir;
-    });
-
-    return await Promise.all(reservoirs);
+    return {
+      reservoirCount: fetchData.length,
+      changedCount: changed,
+    };
   }
 };
