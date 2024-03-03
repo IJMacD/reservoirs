@@ -1,46 +1,60 @@
 
+/**
+ * @typedef Reservoir
+ * @property {string?} id
+ * @property {string} name
+ * @property {number} capacity
+ * @property {number} utilisation
+ * @property {string?} image
+ */
+
 module.exports = {
-  checkReservoirs: function () {
+  /**
+   * Checks Reservoirs upstream and updates database as necessary
+   * @returns {Promise<Reservoir[]>}
+   */
+  checkReservoirs: async function () {
     var WSD = require('./WSD');
     var ReservoirDB = require('./ReservoirDB');
 
-    return Promise.all([
+    const results = await Promise.all([
       WSD.getReservoirs(),
       ReservoirDB.getReservoirs()
-    ]).then(function(results){
-      var fetchData = results[0];
-      var dbData = results[1];
-      var time = Date.now();
+    ]);
 
-      var reservoirs = fetchData.map(function (fetchReservoir) {
-        
-        var dbReservoir = findReservoir(dbData, fetchReservoir.name) || {};
+    var fetchData = results[0];
+    var dbData = results[1];
 
-        var hasChanged = dbReservoir.utilisation != fetchReservoir.utilisation;
+    var time = Date.now();
 
-        var reservoir = {
-          id: dbReservoir.id,
-          name: fetchReservoir.name,
-          capacity: fetchReservoir.capacity,
-          utilisation: fetchReservoir.utilisation,
-          image: dbReservoir.image
-        };
+    var reservoirs = fetchData.map(function (fetchReservoir) {
 
-        if(hasChanged) {
-          return ReservoirDB.update(reservoir, time).then(() => reservoir);
-        }
+      var dbReservoir = dbData.find(r => r.name === fetchReservoir.name);
 
+      var reservoir = {
+        id: dbReservoir?.id ?? null,
+        name: fetchReservoir.name,
+        capacity: fetchReservoir.capacity,
+        utilisation: fetchReservoir.utilisation,
+        image: dbReservoir?.image ?? null
+      };
+
+      if (!dbReservoir) {
+        console.warn(`Unable to find reservoir ${fetchReservoir.name} in database`);
         return reservoir;
-      });
+      }
 
-      return Promise.all(reservoirs);
+      // Check if reservoir utilisation has changed (more than float limits) and
+      // update as necessary.
+      var hasChanged = dbReservoir.utilisation.toFixed(5) !== fetchReservoir.utilisation.toFixed(5);
+
+      if (hasChanged) {
+        return ReservoirDB.update(reservoir, time).then(() => reservoir);
+      }
+
+      return reservoir;
     });
+
+    return await Promise.all(reservoirs);
   }
 };
-
-function findReservoir(array, name) {
-  var found = array.filter(function(reservoir) { return reservoir.name == name; });
-  if(found.length){
-    return found[0];
-  }
-}

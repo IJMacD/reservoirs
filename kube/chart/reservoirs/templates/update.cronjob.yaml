@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/component: reservoirs-update
     app.kubernetes.io/part-of: reservoirs
 spec:
-  schedule: "0 * * * *"
+  schedule: "30 15 * * *"
   jobTemplate:
     metadata:
       labels:

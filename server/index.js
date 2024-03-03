@@ -1,5 +1,6 @@
 var express = require('express');
 var path = require('path');
+const ReservoirDB = require('./ReservoirDB');
 
 const PORT = process.env.PORT || 3001;
 
@@ -17,9 +18,7 @@ app.get('/reservoirs.json', function (req, res) {
 
   res.header("Access-Control-Allow-Origin", "*");
 
-  const Reservoirs = require('./Reservoirs');
-
-  Reservoirs.checkReservoirs().then(function (reservoirs) {
+  ReservoirDB.getReservoirs().then(function (reservoirs) {
 
     var result = {
       reservoirs

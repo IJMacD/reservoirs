@@ -1,11 +1,21 @@
 var mysql = require('mysql');
 
 module.exports = {
-  getReservoirs: function () {
+  /**
+   *
+   * @returns {Promise<import('./Reservoirs').Reservoir[]>}
+   */
+  getReservoirs() {
     return query("SELECT id,name,utilisation,capacity,image FROM reservoirs");
   },
 
-  update: function (reservoir, time) {
+  /**
+   *
+   * @param {import('./Reservoirs').Reservoir} reservoir
+   * @param {number} time
+   * @returns
+   */
+  async update(reservoir, time) {
     var sql;
     var params;
 
@@ -18,10 +28,13 @@ module.exports = {
       params = [reservoir.name, reservoir.capacity, reservoir.utilisation];
     }
 
-    return query(sql, params).then(function (result) {
+    try {
+      const result = await query(sql, params);
+
       var id = reservoir.id || result.rows[0].id;
-      var sql = "INSERT INTO reservoirs_history (reservoir_id, time, capacity, utilisation) VALUES (?, ?, ?, ?)";
       reservoir.id = id;
+
+      var sql_2 = "INSERT INTO reservoirs_history (reservoir_id, time, capacity, utilisation) VALUES (?, ?, ?, ?)";
 
       // Server timezone has been set to +00:00 for this connection
       // `time` column is TIMESTAMP which saves it as the correct point in time.
@@ -29,11 +42,20 @@ module.exports = {
       // is timezone agnostic)
       const serverDate = new Date(time).toISOString().replace("T", " ").replace("Z", "");
 
-      return query(sql, [id, serverDate, reservoir.capacity, reservoir.utilisation]);
-    }).catch(function (error) { console.error(error); }).then(() => reservoir);
+      await query(sql_2, [id, serverDate, reservoir.capacity, reservoir.utilisation]);
+
+    } catch (error) {
+      console.error(error);
+    }
+
+    return reservoir;
   }
 };
 
+/**
+ * @param {string} sql
+ * @param {(string|number)[]} [params]
+ */
 function query(sql, params) {
   return new Promise(function (resolve, reject) {
     const {
@@ -53,21 +75,21 @@ function query(sql, params) {
         return;
       }
 
-      connection.query("SET time_zone = '+00:00';", null, () => {
+      // Queries are guaranteed to be sent in sequence
+      connection.query("SET time_zone = '+00:00';");
 
-        connection.query(sql, params, function (err, results, fields) {
-          if (err) {
-            console.error(err);
-            reject(err);
-            return;
-          }
+      connection.query(sql, params, function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          reject(err);
+          return;
+        }
 
-          resolve(results);
-
-          connection.end();
-        });
-
+        resolve(results);
       });
+
+      // Guarantees queries are completed before quit packet is sent to server
+      connection.end();
     });
 
   });
