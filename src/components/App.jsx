@@ -7,8 +7,8 @@ import styles from '../styles/App.module.css';
 const RESERVOIR_URL = '/reservoirs.json';
 
 export default class App extends React.Component {
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
 
     this.state = {
       isLoading: true,

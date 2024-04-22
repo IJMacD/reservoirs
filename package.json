@@ -4,8 +4,8 @@
   "description": "A sample Node.js app using Express 4",
   "main": "server.js",
   "scripts": {
-    "build": "react-scripts build",
-    "start": "react-scripts start",
+    "build": "vite build",
+    "dev": "vite",
     "server": "cd server && node -r dotenv/config index.js"
   },
   "dependencies": {
@@ -27,18 +27,6 @@
   "devDependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-scripts": "^5.0.1"
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "vite": "^5.2.10"
   }
 }
