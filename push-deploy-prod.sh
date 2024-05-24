@@ -12,10 +12,8 @@ fi
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 source ${SCRIPT_DIR}/vars.sh
 
-echo "Deploying version $GIT_TAG"
-
-# Override
-export KUBECONFIG=~/.kube/config.prod
+CURRENT_CONTEXT=$(kubectl config current-context)
+echo "Deploying version $GIT_TAG to cluster $CURRENT_CONTEXT"
 
 export MARIADB_ROOT_PASSWORD=$(kubectl get secret --namespace "$APPNAME" $APPNAME-mariadb -o jsonpath="{.data.mariadb-root-password}" 2>/dev/null | base64 -d)
 export MARIADB_PASSWORD=$(kubectl get secret --namespace "$APPNAME" $APPNAME-mariadb -o jsonpath="{.data.mariadb-password}" 2>/dev/null | base64 -d)
