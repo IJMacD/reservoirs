@@ -37,9 +37,4 @@ spec:
                       name: {{ .Release.Name }}-mariadb
                       key: mariadb-password
               resources:
-                requests:
-                  memory: 50Mi
-                  cpu: 50m
-                limits:
-                  memory: 100Mi
-                  cpu: 100m
+{{ toYaml .Values.web.resources | indent 16 }}
