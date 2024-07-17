@@ -31,7 +31,7 @@ web:
 update:
   resources:
     requests:
-      memory: 10Mi
-      cpu: 10m
+      memory: 40Mi
+      cpu: 5m
     limits:
-      memory: 10Mi
+      memory: 40Mi

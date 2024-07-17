@@ -37,4 +37,4 @@ spec:
                       name: {{ .Release.Name }}-mariadb
                       key: mariadb-password
               resources:
-{{ toYaml .Values.web.resources | indent 16 }}
+                {{- toYaml .Values.update.resources | nindent 16 }}
