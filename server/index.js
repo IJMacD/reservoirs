@@ -1,10 +1,13 @@
-var express = require('express');
-var path = require('path');
-const ReservoirDB = require('./ReservoirDB');
+import express from 'express';
+import path from 'path';
+import * as ReservoirDB from './ReservoirDB.js';
 
 const PORT = process.env.PORT || 3001;
 
 var app = express();
+
+// const __dirname = import.meta.dirname;
+const __dirname = new URL('.', import.meta.url).pathname;
 
 var indexPath = path.join(__dirname, './dist/index.html');
 

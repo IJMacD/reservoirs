@@ -1,3 +1,6 @@
+import fetch from "node-fetch";
+import * as cheerio from "cheerio";
+
 const url = "https://www.wsd.gov.hk/en/core-businesses/operation-and-maintenance-of-waterworks/waterworks/current-storage-position-of-impounding-reservoirs/index.html";
 
 /**
@@ -7,31 +10,14 @@ const url = "https://www.wsd.gov.hk/en/core-businesses/operation-and-maintenance
  * @property {number} utilisation
  */
 
-module.exports = {
-  /**
-   *
-   * @returns {Promise<WSDReservoir[]>}
-   */
-  getReservoirs: async function () {
-    const html = await fetch(url);
-    return scrapeHTML(html);
-  }
-};
-
 /**
- * @param {string} url
+ *
+ * @returns {Promise<WSDReservoir[]>}
  */
-function fetch(url) {
-  var request = require('request');
-
-  return new Promise(function (resolve, reject) {
-    request(url, function (error, response, html) {
-      if (error) {
-        reject(error);
-      }
-      resolve(html);
-    });
-  });
+export async function getReservoirs() {
+  const response = await fetch(url);
+  const html = await response.text();
+  return scrapeHTML(html);
 }
 
 /**
@@ -39,8 +25,6 @@ function fetch(url) {
  * @returns {WSDReservoir[]}
  */
 function scrapeHTML(html) {
-  var cheerio = require('cheerio');
-
   var $ = cheerio.load(html);
 
   var table = $('table').get(1);

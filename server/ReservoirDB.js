@@ -1,56 +1,54 @@
-var mysql = require('mysql');
+import mysql from 'mysql';
 
-module.exports = {
-  /**
-   *
-   * @returns {Promise<import('./Reservoirs').Reservoir[]>}
-   */
-  getReservoirs() {
-    return query("SELECT id,name,utilisation,capacity,image FROM reservoirs");
-  },
+/**
+ *
+ * @returns {Promise<import('./Reservoirs').Reservoir[]>}
+ */
+export function getReservoirs() {
+  return query("SELECT id,name,utilisation,capacity,image FROM reservoirs");
+}
 
-  /**
-   * Updates (or inserts) current reservoir data and logs history
-   * @param {{id: string|undefined,name:string,capacity:number,utilisation:number}} reservoir
-   * @param {number} time
-   * @returns
-   */
-  async update(reservoir, time) {
-    var sql;
-    var params;
+/**
+ * Updates (or inserts) current reservoir data and logs history
+ * @param {{id: string|undefined,name:string,capacity:number,utilisation:number}} reservoir
+ * @param {number} time
+ * @returns
+ */
+export async function update(reservoir, time) {
+  var sql;
+  var params;
 
-    try {
-      if (typeof reservoir.id !== "undefined") {
-        sql = "UPDATE reservoirs SET utilisation = ? WHERE id = ?";
-        params = [reservoir.utilisation, reservoir.id];
-      }
-      else {
-        sql = "INSERT INTO reservoirs (name, capacity, utilisation) VALUES (?, ?, ?) RETURNING id";
-        params = [reservoir.name, reservoir.capacity, reservoir.utilisation];
-      }
-
-      const result = await query(sql, params);
-
-      var id = reservoir.id || result.rows[0].id;
-      reservoir.id = id;
-
-      var sql_2 = "INSERT INTO reservoirs_history (reservoir_id, time, capacity, utilisation) VALUES (?, ?, ?, ?)";
-
-      // Server timezone has been set to +00:00 for this connection
-      // `time` column is TIMESTAMP which saves it as the correct point in time.
-      // n.b. DATETIME column does NOT store the correct moment in time (i.e. it
-      // is timezone agnostic)
-      const serverDate = new Date(time).toISOString().replace("T", " ").replace("Z", "");
-
-      await query(sql_2, [id, serverDate, reservoir.capacity, reservoir.utilisation]);
-
-    } catch (error) {
-      console.error(error);
+  try {
+    if (typeof reservoir.id !== "undefined") {
+      sql = "UPDATE reservoirs SET utilisation = ? WHERE id = ?";
+      params = [reservoir.utilisation, reservoir.id];
+    }
+    else {
+      sql = "INSERT INTO reservoirs (name, capacity, utilisation) VALUES (?, ?, ?) RETURNING id";
+      params = [reservoir.name, reservoir.capacity, reservoir.utilisation];
     }
 
-    return reservoir;
+    const result = await query(sql, params);
+
+    var id = reservoir.id || result.rows[0].id;
+    reservoir.id = id;
+
+    var sql_2 = "INSERT INTO reservoirs_history (reservoir_id, time, capacity, utilisation) VALUES (?, ?, ?, ?)";
+
+    // Server timezone has been set to +00:00 for this connection
+    // `time` column is TIMESTAMP which saves it as the correct point in time.
+    // n.b. DATETIME column does NOT store the correct moment in time (i.e. it
+    // is timezone agnostic)
+    const serverDate = new Date(time).toISOString().replace("T", " ").replace("Z", "");
+
+    await query(sql_2, [id, serverDate, reservoir.capacity, reservoir.utilisation]);
+
+  } catch (error) {
+    console.error(error);
   }
-};
+
+  return reservoir;
+}
 
 /**
  * @param {string} sql
