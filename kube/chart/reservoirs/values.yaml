@@ -18,6 +18,14 @@ web:
     image: docker.io/ijmacd/reservoirs
     tag: ""
   existingSecret:
+  ingress:
+    enabled: false
+  gateway:
+    enabled: true
+    parentRef:
+      name: gateway
+      namespace: default
+      sectionName: https
   tls:
     enabled: false
   local:
